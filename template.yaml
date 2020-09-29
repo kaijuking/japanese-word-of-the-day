@@ -1,0 +1,104 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: 'Japanese Word Of The Day'
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 60
+
+Resources:
+  PostNewWord:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: src/
+      Handler: app.lambda_handler
+      Runtime: python3.8
+      Policies:
+      - AmazonDynamoDBFullAccess
+      - AWSLambdaExecute
+      - AmazonS3FullAccess
+      - Statement:
+        - Sid: SSMGetParametersPolicy
+          Effect: Allow
+          Action:
+          - ssm:GetParameters
+          Resource: '*'
+      Events:
+        PostNewWord:
+          Type: Schedule
+          Properties:
+            Schedule: cron(0 10 * * ? *)
+      Tags:
+        ProjectTag: TweepyApp
+  UpdateJapaneseWordDatabase:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: app.update_database_with_new_data
+      Runtime: python3.8
+      Policies:
+      - AmazonDynamoDBFullAccess
+      - AWSLambdaExecute
+      - AmazonS3FullAccess
+      - Statement:
+        - Sid: SSMGetParametersPolicy
+          Effect: Allow
+          Action:
+          - ssm:GetParameters
+          Resource: '*'
+      Events:
+        NewWordsAddedEvent:
+          Type: S3
+          Properties:
+            Bucket:
+              Ref: SrcBucket
+            Events: s3:ObjectCreated:*
+  AppEventUploadNewWords:
+      Type: AWS::Events::Rule
+      Properties:
+        Description: An event triggered when a file is uploaded to the s3 bucket
+        Name: FileUploadedToS3BucketEvent
+        State: ENABLED
+        EventPattern: 
+          source: 
+            - "aws.s3"
+        Targets:
+          -
+            Arn:
+              Fn::GetAtt:
+                - "UpdateJapaneseWordDatabase"
+                - "Arn"
+            Id: "UpdateJapaneseWordDatabase"
+  DynamoDBTable:
+    Type: AWS::DynamoDB::Table
+    Properties: 
+      TableName: 'TwitterBotJapaneseWordDB'
+      AttributeDefinitions: 
+        - AttributeName: wordid
+          AttributeType: S
+        - AttributeName: wordtype
+          AttributeType: S
+      KeySchema:
+        - AttributeName: wordid
+        # https://docs.amazonaws.cn/en_us/AWSCloudFormation/latest/UserGuide/aws-properties-dynamodb-table-keyschema.html
+          KeyType: HASH # The partition key of an item is also known as its hash attribute
+        - AttributeName: wordtype
+          KeyType: RANGE # The sort key of an item is also known as its range attribute
+      BillingMode: PROVISIONED
+      ProvisionedThroughput: 
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+  SrcBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+          BucketName: 'twitter-bot-japanese-daily-word-s3'
+          BucketEncryption: 
+            ServerSideEncryptionConfiguration: 
+            - ServerSideEncryptionByDefault:
+                SSEAlgorithm: AES256
+          PublicAccessBlockConfiguration:
+            BlockPublicAcls : true
+            BlockPublicPolicy : true
+            IgnorePublicAcls : true
+            RestrictPublicBuckets : true
