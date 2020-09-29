@@ -1,0 +1,1 @@
+# japanese-word-of-the-day
