@@ -2,14 +2,16 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: 'Japanese Word Of The Day'
 
-# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+# Global variables
 Globals:
   Function:
     Timeout: 60
 
 Resources:
+
+  # Lambda Function 1: Post New Word
   PostNewWord:
-    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Type: AWS::Serverless::Function
     Properties:
       CodeUri: src/
       Handler: app.lambda_handler
@@ -24,18 +26,15 @@ Resources:
           Action:
           - ssm:GetParameters
           Resource: '*'
-      Events:
-        PostNewWord:
-          Type: Schedule
-          Properties:
-            Schedule: cron(0 10 * * ? *)
       Tags:
         ProjectTag: TweepyApp
+
+  # Lambd Function 2: Update Database
   UpdateJapaneseWordDatabase:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: src/
-      Handler: app.update_database_with_new_data
+      Handler: updatedatabase.update_database_with_new_data
       Runtime: python3.8
       Policies:
       - AmazonDynamoDBFullAccess
@@ -54,6 +53,8 @@ Resources:
             Bucket:
               Ref: SrcBucket
             Events: s3:ObjectCreated:*
+            
+  # Event for file uploaded to S3          
   AppEventUploadNewWords:
       Type: AWS::Events::Rule
       Properties:
@@ -70,6 +71,36 @@ Resources:
                 - "UpdateJapaneseWordDatabase"
                 - "Arn"
             Id: "UpdateJapaneseWordDatabase"
+
+  # Once daily event to trigger Lambda Function 1
+  AppEventPostNewWord:
+      Type: AWS::Events::Rule
+      Properties:
+        Description: A scheduled event to post a new word
+        Name: OnceDailyScheduleEventPostNewWord
+        ScheduleExpression: "cron(0 10 * * ? *)"
+        State: ENABLED
+        Targets:
+          -
+            Arn:
+              Fn::GetAtt:
+                - "PostNewWord"
+                - "Arn"
+            Id: "PostNewWord"
+
+  PermissionForAppEventPostNewWord: 
+    Type: AWS::Lambda::Permission
+    Properties: 
+      FunctionName: 
+        Ref: "PostNewWord"
+      Action: "lambda:InvokeFunction"
+      Principal: "events.amazonaws.com"
+      SourceArn: 
+        Fn::GetAtt: 
+          - "AppEventPostNewWord"
+          - "Arn"
+
+  # DynamoDB Table
   DynamoDBTable:
     Type: AWS::DynamoDB::Table
     Properties: 
@@ -81,14 +112,15 @@ Resources:
           AttributeType: S
       KeySchema:
         - AttributeName: wordid
-        # https://docs.amazonaws.cn/en_us/AWSCloudFormation/latest/UserGuide/aws-properties-dynamodb-table-keyschema.html
-          KeyType: HASH # The partition key of an item is also known as its hash attribute
+          KeyType: HASH
         - AttributeName: wordtype
-          KeyType: RANGE # The sort key of an item is also known as its range attribute
+          KeyType: RANGE
       BillingMode: PROVISIONED
       ProvisionedThroughput: 
         ReadCapacityUnits: 5
         WriteCapacityUnits: 5
+
+  # S3 Bucket
   SrcBucket:
     Type: AWS::S3::Bucket
     Properties:
