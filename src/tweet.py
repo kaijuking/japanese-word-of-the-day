@@ -31,6 +31,7 @@ class Tweet:
 
     
     def get_last_post(self):
+        print('Attempting to get last post...')
         try:
             last_tweet = self.api.home_timeline()
             return last_tweet[0].text
@@ -40,7 +41,7 @@ class Tweet:
 
     
     def authenticate_to_account(self):
-        print("Authenticated to Twitter API...")
+        print("Authenticating to Twitter API...")
 
         access_keys = self.access_keys
 

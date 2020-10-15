@@ -1,4 +1,4 @@
-from getconfigvalues import get_twitter_account_info, get_database_name
+from getconfigvalues import get_twitter_account_info
 from word import get_word_of_the_day
 from tweet import Tweet
 
