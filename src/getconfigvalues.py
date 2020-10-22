@@ -33,6 +33,7 @@ def get_twitter_account_info():
     except Exception as error:
         message = f'Error retrieving information from SSM: {error}'
         print(message)
+        return error
 
 
 def get_database_name():
@@ -53,3 +54,4 @@ def get_database_name():
     except Exception as error:
         message = f'Error retrieving information from SSM: {error}'
         print(message)
+        return error

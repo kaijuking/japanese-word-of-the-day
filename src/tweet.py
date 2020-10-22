@@ -25,9 +25,10 @@ class Tweet:
                 response = self.api.update_status(message)
 
             return response
-        except Exception as error:
+        except tweepy.TweepError as error:
             message = f'Error attempting to post to account. Error = {error}'
             print(message)
+            return error
 
     
     def get_last_post(self):
@@ -35,9 +36,11 @@ class Tweet:
         try:
             last_tweet = self.api.home_timeline()
             return last_tweet[0].text
-        except Exception as error:
+        except tweepy.TweepError as error:
             message = f'Error attempting to get last post. Error = {error}'
             print(message)
+            print(error)
+            return error
 
     
     def authenticate_to_account(self):
@@ -57,3 +60,4 @@ class Tweet:
         except Exception as error:
             message = f'Error attempting to authenticate to account. Error = {error}'
             print(message)
+            return error
