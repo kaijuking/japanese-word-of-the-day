@@ -16,14 +16,14 @@ class Tweet:
     def create_new_post(self, message):
         print('Attempting to post a new message...')
         try:
-            last_post = self.get_last_post()
+            #last_post = self.get_last_post()
 
-            if not last_post == message:
-                response = self.api.update_status(message)
-            else:
-                message = self.get_default_post()
-                response = self.api.update_status(message)
-
+            #if not last_post == message:
+                #response = self.api.update_status(message)
+            #else:
+                #message = self.get_default_post()
+                #response = self.api.update_status(message)
+            response = self.api.update_status(message)
             return response
         except tweepy.TweepError as error:
             message = f'Error attempting to post to account. Error = {error}'
@@ -39,10 +39,47 @@ class Tweet:
         except tweepy.TweepError as error:
             message = f'Error attempting to get last post. Error = {error}'
             print(message)
-            print(error)
+            return error
+
+
+    def get_last_twenty_posts(self):
+        '''
+            Per documentation: 
+            Returns the 20 most recent statuses posted from the authenticating user or the user specified. It’s also possible to request another user’s timeline via the id parameter.
+        '''
+        print('Attempting to get user timeline...')
+        timeline_posts = []
+        try:
+            user_timeline = self.api.home_timeline()
+            for item in user_timeline:
+                timeline_posts.append(item.text)
+            return timeline_posts
+        except tweepy.TweepError as error:
+            message = f'Error attempting to get user timeline. Error = {error}'
+            print(message)
             return error
 
     
+    def get_user_info(self):
+        '''
+            Per documentation: 
+            Returns the authenticated user info..
+        '''
+        print('Attempting to get user info...')
+        try:
+            user = self.api.me()
+            user_info = {
+                'user_id': user.id_str,
+                'user_name': user.screen_name,
+                'description': user.description
+            }
+            return user_info
+        except tweepy.TweepError as error:
+            message = f'Error attempting to get user info. Error = {error}'
+            print(message)
+            return error
+
+
     def authenticate_to_account(self):
         print("Authenticating to Twitter API...")
 

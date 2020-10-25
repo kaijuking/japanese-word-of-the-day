@@ -3,7 +3,7 @@ import random
 from getconfigvalues import get_database_name
 
 
-def get_word_of_the_day():
+def get_words_from_database():
 
     print('Attempting to get a new word...')
       
@@ -28,16 +28,59 @@ def get_word_of_the_day():
             IndexName="wordtype-index"
         )
 
-        random_item = random.choice(response['Items'])
-        word = random_item['word']['S']
-        pronunciation = random_item['pronunciation']['S']
-        meaning = random_item['meaning']['S']
+        return response['Items']
 
-        if pronunciation == "":
-            new_word = f'{word} = {meaning}'
-        else:
-            new_word = f'{word} ({pronunciation}) = {meaning}'
-        return new_word
     except Exception as error:
         message = f'Error retrieving word from databse. Error = {error}'
         print(message)
+        return 'Error retrieving word from databse.'
+
+
+def transform_data_from_database(word_list):
+    '''
+        word_list: list returned from querying the database
+    '''
+
+    print('trying to transform data')
+
+    transformed_word_list = []
+
+    for item in word_list:
+        
+        word = item['word']['S']
+        pronunciation = item['pronunciation']['S']
+        meaning = item['meaning']['S']
+
+        if pronunciation == "":
+            new_word = f'Word: {word}, Meaning: {meaning}'
+        else:
+            new_word = f'Word: {word}, Pronunciation: {pronunciation}, Meaning: {meaning}'
+        transformed_word_list.append(new_word)
+
+    return transformed_word_list
+
+
+def get_random_word(word_list, timeline_posts):
+    '''
+        word_list: transformed data from the database
+        timeline_posts: a string list containing the last twenty posts from the user's timeline
+
+    '''
+
+    new_word = None
+
+    try:
+
+        for i in range(len(word_list)):
+            if not word_list[i] in timeline_posts:
+                new_word = word_list[i]
+        
+        if not new_word is None:
+            return new_word
+        else:
+            default_post = 'Thank you for following MaikuOnline! 毎日頑張りましょう！'
+            return default_post
+
+    except Exception as error:
+        print(f'Error trying to get a random word. Error = {error}')
+        return 'Error trying to get a random word.'

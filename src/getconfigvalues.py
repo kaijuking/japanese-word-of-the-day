@@ -7,14 +7,18 @@ def get_twitter_account_info():
         'TWEEPY_ACCESS_TOKEN', 
         'TWEEPY_ACCESS_TOKEN_SECRET', 
         'TWEEPY_CONSUMER_KEY', 
-        'TWEEPY_CONSUMER_SECRET'
+        'TWEEPY_CONSUMER_SECRET',
+        'TWEEPY_USER_NAME',
+        'TWEEPY_USER_ID'
     ]
 
     keys = {
             'TWEEPY_CONSUMER_KEY': None, 
             'TWEEPY_CONSUMER_SECRET': None, 
             'TWEEPY_ACCESS_TOKEN': None, 
-            'TWEEPY_ACCESS_TOKEN_SECRET': None
+            'TWEEPY_ACCESS_TOKEN_SECRET': None,
+            'TWEEPY_USER_NAME': None,
+            'TWEEPY_USER_ID': None
     }
 
     ssm = boto3.client('ssm')
