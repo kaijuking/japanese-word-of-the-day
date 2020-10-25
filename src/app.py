@@ -7,7 +7,6 @@ def lambda_handler(event, context):
     try:
         # Get data from the database
         raw_data = get_words_from_database()
-        #print(raw_data)
 
         # Transform the raw data
         data = transform_data_from_database(raw_data)
