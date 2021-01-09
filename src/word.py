@@ -78,8 +78,11 @@ def get_random_word(word_list, timeline_posts):
         if not new_word is None:
             return new_word
         else:
-            default_post = 'Thank you for following MaikuOnline! 毎日頑張りましょう！'
-            return default_post
+            default_post = [
+                "Thank you for following MaikuOnline! #Japanese #日本語",
+                "Want to learn more about Japanese language, daily life experiences, and cultural literacy? Than I highly recommend @JapanEverydayJP (https://japaneveryday.jp/)! #Japanese #日本語 #文化 #日常生活"
+                ]
+            return random.choice(default_post)
 
     except Exception as error:
         print(f'Error trying to get a random word. Error = {error}')

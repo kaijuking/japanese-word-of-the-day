@@ -1,4 +1,5 @@
 import tweepy
+import random
 
 
 class Tweet:
@@ -9,8 +10,11 @@ class Tweet:
         
 
     def get_default_post(self):
-        default_post = 'Thank you for following MaikuOnline! 毎日頑張りましょう！'
-        return default_post
+        default_post = [
+            "Thank you for following MaikuOnline! #Japanese #日本語",
+            "Want to learn more about Japanese language, daily life experiences, and cultural literacy? Than I highly recommend @JapanEverydayJP (https://japaneveryday.jp/)! #Japanese #日本語 #文化 #日常生活"
+        ]
+        return random.choice(default_post)
 
 
     def create_new_post(self, message):
