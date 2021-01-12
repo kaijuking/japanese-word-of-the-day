@@ -20,13 +20,6 @@ class Tweet:
     def create_new_post(self, message):
         print('Attempting to post a new message...')
         try:
-            #last_post = self.get_last_post()
-
-            #if not last_post == message:
-                #response = self.api.update_status(message)
-            #else:
-                #message = self.get_default_post()
-                #response = self.api.update_status(message)
             response = self.api.update_status(message)
             return response
         except tweepy.TweepError as error:
