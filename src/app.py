@@ -22,6 +22,7 @@ def lambda_handler(event, context):
 
         # Get a random word
         message = get_random_word(data, timeline_posts)
+        print(f'message to post = {message}')
 
         # Post new message to Twitter account
         new_tweet.create_new_post(message)

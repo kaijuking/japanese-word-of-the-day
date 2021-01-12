@@ -52,9 +52,9 @@ def transform_data_from_database(word_list):
         meaning = item['meaning']['S']
 
         if pronunciation == "":
-            new_word = f'Word: {word}, Meaning: {meaning} #Japanese #日本語'
+            new_word = f"Word: {word}, Meaning: {meaning} #Japanese #日本語"
         else:
-            new_word = f'Word: {word}, Pronunciation: {pronunciation}, Meaning: {meaning} #Japanese #日本語'
+            new_word = f"Word: {word}, Pronunciation: {pronunciation}, Meaning: {meaning} #Japanese #日本語"
         transformed_word_list.append(new_word)
 
     return transformed_word_list
